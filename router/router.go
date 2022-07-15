@@ -43,7 +43,7 @@ func handleMessage(channel *amqp.Channel, transformer *Transformer, content []by
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	if err != nil {
-		log.Fatalf("Error connecting to RabitMQ", err)
+		log.Fatalf("Error connecting to RabbitMQ", err)
 	}
 	defer conn.Close()
 
