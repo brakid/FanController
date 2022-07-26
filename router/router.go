@@ -12,9 +12,9 @@ const (
 	ROUTER_OUTPUT_EXCHANGE = "router_output"
 )
 
-func handleMessage(channel *amqp.Channel, transformer *Transformer, content []byte) {
+func handleEvent(channel *amqp.Channel, transformer *Transformer, eventContent []byte) {
 	var data Data
-	err := json.Unmarshal(content, &data)
+	err := json.Unmarshal(eventContent, &data)
 	if err != nil {
 		log.Fatalf("Error deserializing data", err)
 	}
@@ -36,7 +36,7 @@ func handleMessage(channel *amqp.Channel, transformer *Transformer, content []by
 		if err != nil {
 			log.Fatalf("Error sending command %v", command, err)
 		}
-		log.Printf(" [x] Sent %s\n", commandData)
+		log.Printf("[Command Sent] %s\n", commandData)
 	}
 }
 
@@ -117,15 +117,16 @@ func main() {
 
 	var forever chan struct{}
 
-	var transformer Transformer = DummyTransformer{}
+	var transformer Transformer = createTransformer()
 
 	go func() {
 		for msg := range msgs {
-			log.Printf("[x] %s", msg.Body)
-			handleMessage(channel, &transformer, msg.Body)
+			event := msg.Body
+			log.Printf("[Event received] %s\n", event)
+			handleEvent(channel, &transformer, event)
 		}
 	}()
 
-	log.Printf("[*] Waiting for logs. To exit press CTRL+C")
+	log.Printf("[Main] Waiting for events. To exit press CTRL+C")
 	<-forever
 }

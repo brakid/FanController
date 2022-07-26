@@ -1,0 +1,9 @@
+{
+    "TemperatureSensor": { 
+        "comparator": "LARGER_EQUAL",
+        "threshold": 24.0,
+        "resultTrue": 1.0,
+        "resultFalse": 0.0,
+        "targetIds": ["DummyTarget1", "DummyTarget2"]
+    }
+}

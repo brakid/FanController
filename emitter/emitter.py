@@ -23,12 +23,12 @@ def read_temperature_sensor(path):
 
 path = '/sys/devices/w1_bus_master1/28-000006dd9b7c/w1_slave'
 
-temperature = read_temperature_sensor(path)
+temperature = 23.0#read_temperature_sensor(path)
 
-payload = {'emitterId': emitter_id, 'value': str(temperature)}
+payload = {'emitterId': emitter_id, 'value': float(temperature)}
 
 print(f'Connecting to {url}')
 connection = pika.BlockingConnection(pika.URLParameters(url))
 channel = connection.channel()
 channel.basic_publish(exchange='router_input', routing_key='', body=json.dumps(payload))
-print(f'[x] Sent "{payload}"')
+print(f'Sent "{payload}"')
