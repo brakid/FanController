@@ -1,9 +1,32 @@
 {
-    "TemperatureSensor": { 
-        "comparator": "LARGER_EQUAL",
-        "threshold": 24.0,
-        "resultTrue": 1.0,
-        "resultFalse": 0.0,
-        "targetIds": ["DummyTarget1", "DummyTarget2"]
+    "TemperatureSensor": {
+        "targetIds": ["DummyTarget1", "DummyTarget2"],
+        "functionRoot": {
+            "type": "COMPARATOR_NODE",
+            "comparator": "GREATER_EQUAL",
+            "left": {
+                "type": "MATH_NODE",
+                "operator": "SUBTRACT",
+                "left": {
+                    "type": "INPUT_NODE"
+                },
+                "right": {
+                    "type": "VALUE_NODE",
+                    "value": 18.0
+                }
+            },
+            "right": {
+                "type": "VALUE_NODE",
+                "value": 5.0
+            },
+            "resultTrue": {
+                "type": "VALUE_NODE",
+                "value": 1.0
+            },
+            "resultFalse": {
+                "type": "VALUE_NODE",
+                "value": 0.0
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 )
 
 type Transformer interface {
@@ -15,14 +16,18 @@ type ConfigTransformer struct {
 	transformFunctions map[string]TransformationFunctionDescriptor
 }
 
-func createTransformer() Transformer {
+func createTransformer() (Transformer, error) {
 	file, _ := ioutil.ReadFile("transformation.json")
 
 	transformFunctions := make(map[string]TransformationFunctionDescriptor)
 
-	_ = json.Unmarshal([]byte(file), &transformFunctions)
+	err := json.Unmarshal([]byte(file), &transformFunctions)
 
-	return ConfigTransformer{transformFunctions: transformFunctions}
+	if err != nil {
+		return nil, err
+	}
+
+	return ConfigTransformer{transformFunctions: transformFunctions}, nil
 }
 
 func (ct ConfigTransformer) TransformData(input Data) []Command {
@@ -39,13 +44,14 @@ func (ct ConfigTransformer) TransformData(input Data) []Command {
 func applyFunction(tfd TransformationFunctionDescriptor, input Data) []Command {
 	targetIds := tfd.TargetIds
 
-	value, err := apply(tfd, input.Value)
+	value, err := evaluate(tfd.FunctionRoot, input.Value)
+
+	commands := make([]Command, len(targetIds))
 
 	if err != nil {
 		log.Printf("Error: %v", err)
+		return commands[0:0]
 	}
-
-	commands := make([]Command, len(targetIds))
 
 	for index, targetId := range targetIds {
 		commands[index] = Command{targetId, value}
@@ -54,38 +60,123 @@ func applyFunction(tfd TransformationFunctionDescriptor, input Data) []Command {
 	return commands
 }
 
-func apply(tfd TransformationFunctionDescriptor, value float64) (float64, error) {
-	switch tfd.Comparator {
-	case LOWER:
-		if value < tfd.Threshold {
-			return tfd.ResultTrue, nil
-		} else {
-			return tfd.ResultFalse, nil
-		}
-	case LOWER_EQUAL:
-		if value <= tfd.Threshold {
-			return tfd.ResultTrue, nil
-		} else {
-			return tfd.ResultFalse, nil
-		}
-	case EQUAL:
-		if value == tfd.Threshold {
-			return tfd.ResultTrue, nil
-		} else {
-			return tfd.ResultFalse, nil
-		}
-	case GREATER_EQUAL:
-		if value >= tfd.Threshold {
-			return tfd.ResultTrue, nil
-		} else {
-			return tfd.ResultFalse, nil
-		}
-	case GREATER:
-		if value > tfd.Threshold {
-			return tfd.ResultTrue, nil
-		} else {
-			return tfd.ResultFalse, nil
-		}
+func deserialize[N Node | MathNode | ValueNode | ComparatorNode](rawNode json.RawMessage) (*N, error) {
+	var root N
+	err := json.Unmarshal(rawNode, &root)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshalling %T: %v", root, err)
 	}
-	return 0.0, fmt.Errorf("Invalid operator")
+	return &root, nil
+}
+
+func evaluate(rawRootNode json.RawMessage, input float64) (float64, error) {
+	root, err := deserialize[Node](rawRootNode)
+	if err != nil {
+		return 0.0, err
+	}
+
+	switch root.Type {
+	case "INPUT_NODE":
+		return input, nil
+	case "VALUE_NODE":
+		return evaluateValueNode(rawRootNode)
+	case "MATH_NODE":
+		return evaluateMathNode(rawRootNode, input)
+	case "COMPARATOR_NODE":
+		return evaluateComparatorNode(rawRootNode, input)
+	default:
+		return 0.0, fmt.Errorf("Invalid Node Type: %v", root.Type)
+	}
+}
+
+func evaluateValueNode(rawNode json.RawMessage) (float64, error) {
+	root, err := deserialize[ValueNode](rawNode)
+	if err != nil {
+		return 0.0, err
+	}
+
+	return root.Value, nil
+}
+
+func evaluateMathNode(rawNode json.RawMessage, input float64) (float64, error) {
+	root, err := deserialize[MathNode](rawNode)
+	if err != nil {
+		return 0.0, err
+	}
+
+	leftValue, err := evaluate(root.LeftOperand, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating left node: %v", err)
+	}
+
+	rightValue, err := evaluate(root.RightOperand, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating right node: %v", err)
+	}
+
+	switch root.Operator {
+	case ADD:
+		return leftValue + rightValue, nil
+	case SUBTRACT:
+		return leftValue - rightValue, nil
+	case MULTIPLY:
+		return leftValue * rightValue, nil
+	case DIVIDE:
+		return leftValue / rightValue, nil
+	case MAX:
+		return math.Max(leftValue, rightValue), nil
+	case MIN:
+		return math.Min(leftValue, rightValue), nil
+	}
+
+	return 0.0, fmt.Errorf("Invalid Operator: %v", root.Operator)
+}
+
+func evaluateComparatorNode(rawNode json.RawMessage, input float64) (float64, error) {
+	root, err := deserialize[ComparatorNode](rawNode)
+	if err != nil {
+		return 0.0, err
+	}
+
+	leftValue, err := evaluate(root.LeftOperand, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating left node: %v", err)
+	}
+
+	rightValue, err := evaluate(root.RightOperand, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating right node: %v", err)
+	}
+
+	resultTrue, err := evaluate(root.ResultTrue, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating true result: %v", err)
+	}
+
+	resultFalse, err := evaluate(root.ResultFalse, input)
+	if err != nil {
+		return 0.0, fmt.Errorf("Error evaluating false result: %v", err)
+	}
+
+	var comparatorResult bool
+	switch root.Comparator {
+	case LOWER:
+		comparatorResult = leftValue < rightValue
+	case LOWER_EQUAL:
+		comparatorResult = leftValue <= rightValue
+	case EQUAL:
+		comparatorResult = leftValue == rightValue
+	case GREATER_EQUAL:
+		comparatorResult = leftValue >= rightValue
+	case GREATER:
+		comparatorResult = leftValue > rightValue
+	default:
+		return 0.0, fmt.Errorf("Invalid operator")
+	}
+
+	if comparatorResult {
+		return resultTrue, nil
+	} else {
+		return resultFalse, nil
+	}
 }

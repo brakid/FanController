@@ -117,7 +117,10 @@ func main() {
 
 	var forever chan struct{}
 
-	var transformer Transformer = createTransformer()
+	transformer, err := createTransformer()
+	if err != nil {
+		log.Fatalf("Error creating a transformer", err)
+	}
 
 	go func() {
 		for msg := range msgs {
