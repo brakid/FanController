@@ -1,6 +1,6 @@
 {
     "TemperatureSensor": {
-        "targetIds": ["DummyTarget1", "DummyTarget2"],
+        "targetIds": ["DummyTarget", "DummyTarget2"],
         "functionRoot": {
             "type": "COMPARATOR_NODE",
             "comparator": "GREATER_EQUAL",

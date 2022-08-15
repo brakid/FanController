@@ -1,8 +1,8 @@
 # FanController
 
-Fan Motor: https://www.amazon.de/dp/B0922N8MCR
+Goal of this project is to implement an extensible system that reacts to input values and triggers actions in other systems. The system should be flexible to support various data emitters whose information should be processed as well as various actuators taking action based on the emitter values.
 
-Docker RabbitMQ: ```docker run -d -p 5672:5672 --hostname fan-rabbit --name fan-rabbit rabbitmq:3```
+The system's core is the Router component that contains the transformation logic and relays the results to the actuators. Information flows through the system using message queues.
 
 ## Architecture Diagram:
 Principle: using messages queues and exchanges to send data around.
@@ -46,5 +46,12 @@ The AST syntax supports Comparators, Math Operations, using the sent value as we
 
 As [Go](https://go.dev/) does not allow for [inheritance](https://www.geeksforgeeks.org/inheritance-in-golang/), using [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is not as straightforward as in [Object-Oriented](https://www.techtarget.com/searchapparchitecture/definition/object-oriented-programming-OOP) languages such as [Java](https://www.java.com/en/). We currently need to pass a type field in each node of the function expression denoting the type to be able to emulate polymorphism in deserialiying differen Node types that each have different evaluation logic.
 
+## Running the system
+1. Start the RabbitMQ server: Docker RabbitMQ: ```docker run -d -p 5672:5672 --hostname fan-rabbit --name fan-rabbit rabbitmq:3```
+2. Start the Router: ```cd router; go run router.go transformer.go types.go```
+3. Start the Actuator: ```cd actuator; python actuator.py```
+4. Start the Emitter: ```cd emitter; python emitter.py```
+
 ## Links:
 * RabbitMQ: [https://www.rabbitmq.com](https://www.rabbitmq.com)
+* Fan Motor: [https://www.amazon.de/dp/B0922N8MCR](https://www.amazon.de/dp/B0922N8MCR)
