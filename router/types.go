@@ -3,13 +3,13 @@ package main
 import "encoding/json"
 
 type Data struct {
-	EmitterId string  `json:emitterId`
-	Value     float64 `json:value`
+	EmitterId string  `json:"emitterId"`
+	Value     float64 `json:"value"`
 }
 
 type Command struct {
-	TargetId string  `json:targetId`
-	Value    float64 `json:value`
+	TargetId string  `json:"targetId"`
+	Value    float64 `json:"value"`
 }
 
 const (
@@ -20,7 +20,7 @@ const (
 )
 
 type Node struct {
-	Type string `json:type`
+	Type string `json:"type"`
 }
 
 const (
@@ -34,7 +34,7 @@ const (
 
 type MathNode struct {
 	Node
-	Operator     string          `json:operator`
+	Operator     string          `json:"operator"`
 	LeftOperand  json.RawMessage `json:"left"`
 	RightOperand json.RawMessage `json:"right"`
 }
@@ -49,16 +49,16 @@ const (
 
 type ComparatorNode struct {
 	Node
-	Comparator   string          `json:comparator`
+	Comparator   string          `json:"comparator"`
 	LeftOperand  json.RawMessage `json:"left"`
 	RightOperand json.RawMessage `json:"right"`
-	ResultTrue   json.RawMessage `json:resultTrue`
-	ResultFalse  json.RawMessage `json:resultFalse`
+	ResultTrue   json.RawMessage `json:"resultTrue"`
+	ResultFalse  json.RawMessage `json:"resultFalse"`
 }
 
 type ValueNode struct {
 	Node
-	Value float64 `json:value`
+	Value float64 `json:"value"`
 }
 
 type InputNode struct {
@@ -66,6 +66,6 @@ type InputNode struct {
 }
 
 type TransformationFunctionDescriptor struct {
-	TargetIds    []string        `json:targetIds`
-	FunctionRoot json.RawMessage `json:functionRoot`
+	TargetIds    []string        `json:"targetIds"`
+	FunctionRoot json.RawMessage `json:"functionRoot"`
 }
