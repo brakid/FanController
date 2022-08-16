@@ -55,3 +55,4 @@ As [Go](https://go.dev/) does not allow for [inheritance](https://www.geeksforge
 ## Links:
 * RabbitMQ: [https://www.rabbitmq.com](https://www.rabbitmq.com)
 * Fan Motor: [https://www.amazon.de/dp/B0922N8MCR](https://www.amazon.de/dp/B0922N8MCR)
+* Raspberry Pi GPIO: [https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm](https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm)
