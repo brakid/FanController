@@ -44,7 +44,7 @@ The AST syntax supports Comparators, Math Operations, using the sent value as we
 }
 ```
 
-As [Go](https://go.dev/) does not allow for [inheritance](https://www.geeksforgeeks.org/inheritance-in-golang/), using [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is not as straightforward as in [Object-Oriented](https://www.techtarget.com/searchapparchitecture/definition/object-oriented-programming-OOP) languages such as [Java](https://www.java.com/en/). We currently need to pass a type field in each node of the function expression denoting the type to be able to emulate polymorphism in deserialiying differen Node types that each have different evaluation logic.
+As [Go](https://go.dev/) does not allow for [inheritance](https://www.geeksforgeeks.org/inheritance-in-golang/), using [Polymorphism](https://en.wikipedia.org/wiki/Polymorphism_(computer_science)) is not as straightforward as in [Object-Oriented](https://www.techtarget.com/searchapparchitecture/definition/object-oriented-programming-OOP) languages such as [Java](https://www.java.com/en/). We currently need to pass a type field in each node of the function expression denoting the type to be able to emulate polymorphism in deserializing different Node types that each have different evaluation logic.
 
 ## Running the system
 1. Start the RabbitMQ server: Docker RabbitMQ: ```docker run -d -p 5672:5672 --hostname fan-rabbit --name fan-rabbit rabbitmq:3```
